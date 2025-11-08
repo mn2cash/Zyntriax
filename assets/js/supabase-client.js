@@ -17,3 +17,4 @@
     console.error('Failed to create Supabase client:', e);
   }
 })();
+

@@ -33,30 +33,57 @@
   // Minimal cart: store count in localStorage and update Cart link text
   function initCart(){
     var KEY = 'zyn_cart_count';
-    function getCount(){ return parseInt(localStorage.getItem(KEY) || '0', 10); }
-    function setCount(n){ localStorage.setItem(KEY, String(n)); updateCartUI(); }
-    function updateCartUI(){
-      var cartLinks = document.querySelectorAll('.cart');
-      cartLinks.forEach(function(el){
-        if(getCount() > 0) el.textContent = 'Cart (' + getCount() + ')';
-        else el.textContent = 'Cart';
+    function getCount(){
+      var raw = localStorage.getItem(KEY);
+      var parsed = parseInt(raw || '0', 10);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    function setCount(n){
+      var next = parseInt(n, 10);
+      if (isNaN(next) || next < 0) next = 0;
+      localStorage.setItem(KEY, String(next));
+      updateCartUI(next);
+    }
+    function updateCartUI(count){
+      var value = typeof count === 'number' ? count : getCount();
+      if (isNaN(value) || value < 0) value = 0;
+      document.querySelectorAll('.cart').forEach(function(el){
+        var label = el.querySelector('.cart-label');
+        if (!label) return;
+        label.textContent = value > 0 ? 'Cart (' + value + ')' : 'Cart';
       });
     }
     // Add-to-cart buttons inside price cards
     document.addEventListener('click', function(e){
       var btn = e.target.closest('button');
-      if(!btn) return;
+      if (!btn) return;
       var text = (btn.textContent || '').trim().toLowerCase();
-      if(text.indexOf('add to cart') !== -1){
+      if (text.indexOf('add to cart') !== -1){
+        var packageId = btn.getAttribute('data-package');
+        if (!packageId) return;
+        
+        // Add to cart items
+        var CART_ITEMS_KEY = 'zyn_cart_items';
+        try {
+          var items = JSON.parse(localStorage.getItem(CART_ITEMS_KEY) || '[]');
+          items.push({ id: packageId, addedAt: new Date().toISOString() });
+          localStorage.setItem(CART_ITEMS_KEY, JSON.stringify(items));
+        } catch(e){
+          console.error('Failed to add item to cart:', e);
+        }
+        
+        // Update counter
         var c = getCount();
         setCount(c + 1);
-        // small feedback
-        btn.textContent = 'Added';
-        setTimeout(function(){ btn.textContent = btn.classList.contains('btn-primary') ? 'Add to cart' : 'Add to cart'; }, 900);
+        
+        // Visual feedback
+        var original = btn.textContent;
+        btn.textContent = 'Added!';
+        setTimeout(function(){ btn.textContent = original; }, 1200);
       }
     });
 
-    updateCartUI();
+    updateCartUI(getCount());
   }
 
   document.addEventListener('DOMContentLoaded', function(){

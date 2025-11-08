@@ -28,17 +28,35 @@
     var container = qs('.lang-cart');
     if (!container) return;
     var user = await getUser();
+    // Preserve only non-auth elements (lang and cart links)
+    var existingLinks = Array.from(container.children).filter(function(child){
+      return child.classList && (child.classList.contains('lang') || child.classList.contains('cart'));
+    });
+    container.innerHTML = '';
+    existingLinks.forEach(link => container.appendChild(link));
     if (user) {
       var email = user.email || 'Account';
-      container.innerHTML = '<span style="color:var(--muted)">'+ email +'</span> <a href="#" id="signout-btn" class="btn btn-ghost">Sign out</a>';
-      var btn = qs('#signout-btn');
-      if (btn) btn.addEventListener('click', async function(e){
+      var emailSpan = document.createElement('span');
+      emailSpan.className = 'auth-email';
+      emailSpan.textContent = email;
+      container.appendChild(emailSpan);
+      var signOutBtn = document.createElement('a');
+      signOutBtn.href = '#';
+      signOutBtn.id = 'signout-btn';
+      signOutBtn.className = 'btn btn-ghost';
+      signOutBtn.textContent = 'Sign out';
+      signOutBtn.addEventListener('click', async function(e){
         e.preventDefault();
         try { await window.supabase.auth.signOut(); } catch(e){ console.error(e); }
         window.location.reload();
       });
+      container.appendChild(signOutBtn);
     } else {
-      container.innerHTML = '<a href="login.html" class="btn btn-ghost">Sign in</a>';
+      var signInBtn = document.createElement('a');
+      signInBtn.href = 'login.html';
+      signInBtn.className = 'btn btn-ghost';
+      signInBtn.textContent = 'Sign in';
+      container.appendChild(signInBtn);
     }
   }
 
