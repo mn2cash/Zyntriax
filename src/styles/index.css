@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #020617;
+}
+
+body {
+  @apply bg-ink text-slate-100 min-h-screen;
+}
+
+.glass {
+  @apply bg-white/5 border border-white/10 backdrop-blur-xl shadow-glass;
+}
+
+.accent-pill {
+  @apply rounded-full bg-gradient-to-r from-neon/80 via-zyn/80 to-neon/80 text-ink font-semibold;
+}
